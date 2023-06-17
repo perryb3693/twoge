@@ -44,10 +44,67 @@ python app.py					#execute the python application
 ```
 Navigate to `http://localhost:5000` in the web browser to use Twoge. Use ^C in the CLI to close the application. 
 
-**Step 2: Dockerizing the Application**
+**Step 2: Testing Application using Docker Compose**
+Next, the Twoge application will be tested on the local machine using Docker Compose. Docker Compose will utilize Dockerfile to build the image for the application, as well as creating application and database container.
+
+Create a Dockerfile in the project root directory. 
+```
+FROM python:alpine                                              #base image
+WORKDIR /app                                                 
+COPY ./requirements.txt /app                                    
+RUN pip install -r requirements.txt                             # install dependencies from requirements.txt file
+COPY . .                                                        # copy app files into the app directory
+EXPOSE 5000                                                     # applicatio will run on port 5000
+CMD ["python", "app.py"]
+```
+Use Docker Compose to define and configure Twoge as a multi-container Docker application. The database will provisioned on the local machine, requiring the creation of two containers; one for the application and one for the database server. 
+```
+version: '3'
+services:
+  database:
+    image: postgres
+    container_name: twogedb_c
+    environment:
+      - POSTGRES_USER=admin                     				#the PostgreSQL user
+      - POSTGRES_PASSWORD=password              				#user db password
+      - POSTGRES_DB=twoge_db             					#PostgreSQL default database created at launch
+    ports:
+      - 5432:5432                               				#PostgreSQL default port number
+    networks:
+      - twoge-net
+
+  web:
+    build: .                                    				#build image using workdir Dockerfile
+    restart: always
+    container_name: twoge_app
+    ports:
+      - 5000:5000                               				#map port 5000 on the container to port 5000 on local machine 
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgres://admin:password@database/twoge_db	#env variable must remain in the correct sqlalchemy uri format
+    depends_on:
+      - database
+    networks:
+      - twoge-net
+
+networks:
+  twoge-net:
+    driver: bridge
+```
+Run the docker-compose yaml file in the CLI
+```
+docker-compose up    								  
+```
+Use "docker-compose down" to clean up docker environment once complete. 
 
 
 
 
 
-SQLALCHEMY_DATABASE_URI=postgresql//admin:password@twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com:5432/mytwoge_db
+
+
+
+
+
+
+
+SQLALCHEMY_DATABASE_URI=postgresql://admin:password@twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com:5432/mytwoge_db
