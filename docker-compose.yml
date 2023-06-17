@@ -1,0 +1,36 @@
+#Use Docker Compose to define and configure multi-container Docker applications. Files should be formatted in YAML. 
+#Specify the services, networks, volumes, and configurations needed for the dojo-jump application and execute the docker compose file. 
+version: '3'
+
+services:
+  database:
+    image: postgres
+    container_name: twogedb_c
+    environment:
+      - POSTGRES_USER=admin                     #the PostgreSQL user
+      - POSTGRES_PASSWORD=password              #user db password
+      - POSTGRES_DB=twoge_db              #PostgreSQL default database created at launch
+    ports:
+      - 5432:5432                               #PostgreSQL default port number
+    networks:
+      - twoge-net
+
+  web:
+    build: .                                    #build image using workdir Dockerfile
+    restart: always
+    container_name: twoge_app
+    ports:
+      - 5000:5000                               #map port 5000 on the container to port 5000 on local machine 
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgres://admin:password@database/twoge_db
+    depends_on:
+      - database
+    networks:
+      - twoge-net
+
+networks:
+  twoge-net:
+    driver: bridge
+
+#Run docker compose file
+#docker-compose up      #use "docker-compose down" to shut down docker compose resources
