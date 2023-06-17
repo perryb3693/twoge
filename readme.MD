@@ -32,8 +32,8 @@ Install PostgreSQL on the local machine and configure the database through the C
 sudo apt install postgresql
 psql --host=twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com --port=5432 --username=postgres
 postgres=> create database mytwoge_db;
-postgres=# create user admin with encrypted password 'password';
-postgres=# grant all privileges on database mytwoge_db to admin;
+postgres=> create user admin with encrypted password 'password';
+postgres=> grant all privileges on database mytwoge_db to admin;
 postgres=> \du 					#confirm user account creation
 postgres=> \l 					#confirm database creation
 ```
