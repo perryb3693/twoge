@@ -106,14 +106,85 @@ mkdir -p .github/workflows
 cd .github/workflows
 vim ci-cd.yml
 ```
--INSERT YML FILE HERE-
+```
+name: Deploy Twoge Application
 
-Define access variables within Github 
+on:
+  push:
+    branches:
+      - master
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  AWS_REGION: 'ca-central-1'
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_USERNAME }}/twoge_app:latest
+
+  eb_deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install EB CLI
+        run: |
+          pip install awsebcli --upgrade
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Init Elastic Beanstalk
+        run: |
+          echo n | eb init 
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          eb deploy
+```
+Define access variables within Github for use within GitHub actions as it executes the yaml configuration file.
 
 <img width="593" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/61e7689f-5b4e-4773-ad2f-eedd0b2e7818">
 
 
-**Setting Up Elastic Beanstalk**
+**Step 4: Setting Up Elastic Beanstalk**
 First, configure the Elastic Beanstalk Twoge environment by running the `eb init` command in the main project directory with the following configurations:
 1. Choose Region
 2. Create New Application
@@ -127,25 +198,28 @@ Comment out or delete elasticbeanstalk hidden files found within the .gitignore 
 
 <img width="578" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/eb045002-edb7-4b6d-8bbc-327a3f783341">
 
+Commit and push application files to the remote repository. GitHub Actions will automatically execute the ci-cd.yml workflow once git push is complete. 
+```
+ git add .							#stages files within the current directory
+ git commit -m " "						#commit staged files
+ git push origin master						#upload files to remote repository
+```
+Confirm repository updates on GitHub and DockerHub. Check GitHub Actions workflow to ensure proper execution. 
 
+<img width="944" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/1d1ff992-4527-4d8e-af81-a2d1363747e8">
 
-
-
-
-
-
-
-
-
-Next, create the environment and define environment variables
-
+Next, create the Elastic Beanstock environment and define environment variables through the EB CLI:
+```
 eb create twoge-eb --single
+```
+Once the EB environment is finished building, set the environment variable using the following command:
+```
 eb setenv SQLALCHEMY_DATABASE_URI=postgresql://admin:password@twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com:5432/mytwoge_db
+```
+Once the EB environment has finished updating, update the inbound rule on the instances associated security group to allow incoming TCP traffic on port 5000.
+Navigate to the domain associated with the Elastic Beanstalk's environment and post your first blog!
 
- 1496  git add .
- 1497  git commit -m "tawazun initial build"
- 1498  git push origin master
+<img width="953" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/6ac90f63-e648-4da0-90af-b5b8661e929b">
 
+<img width="955" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/4196d5d2-7f73-447a-83ca-61ff3800992a">
 
-
-SQLALCHEMY_DATABASE_URI=postgresql://admin:password@twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com:5432/mytwoge_db
