@@ -11,6 +11,7 @@
 The purpose of this project is to implement a CI/CD (Continuous Integration/Continuous Deployment) pipeline for a Python Flask-based Twitter alternative called "Twoge". The pipeline will utilize GitHub Actions for automation, Docker for containerization, Elastic Beanstalk for deployment, and AWS RDS Postgres for the database server. Source application files can be found at https://github.com/chandradeoarya/twoge/
 
 **Step 1: Setting up the Project**
+
 Basic functionality of the Twoge web application will be copied to and tested on the local machine through a python virtual environment, prior to CICD integration.
 
 First, clone the repository to the local machine and initialize the python virtual environment within the working directory with all required packages from the "requirements.txt" text file. 
@@ -46,6 +47,7 @@ python app.py					#execute the python application
 Navigate to `http://localhost:5000` in the web browser to use Twoge. Use ^C in the CLI to close the application. 
 
 **Step 2: Testing Application using Docker Compose**
+
 Next, the Twoge application will be tested on the local machine using Docker Compose. Docker Compose will utilize Dockerfile to build the image for the application, as well as creating application and database container.
 
 Create a Dockerfile in the project root directory. 
@@ -98,6 +100,7 @@ docker-compose up
 Use `docker-compose down` to clean up docker environment once complete. 
 
 **Step 3: Implementing CI/CD using GitHub Actions**
+
 In order to implement CI/CD, GitHub Actions will be utilized to automate checkingout code from the repository on Github, building and testing the Docker image, pushing the Docker image to DockerHub and deploying the application to Elastic Beanstalk. 
 
 First, creat a .github/workflows directory in the project repository on the local machine and create a YAML file to define the GitHub Actions workflow once pushed to the repository.
@@ -183,8 +186,8 @@ Define access variables within Github for use within GitHub actions as it execut
 
 <img width="593" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/61e7689f-5b4e-4773-ad2f-eedd0b2e7818">
 
-
 **Step 4: Setting Up Elastic Beanstalk**
+
 First, configure the Elastic Beanstalk Twoge environment by running the `eb init` command in the main project directory with the following configurations:
 1. Choose Region
 2. Create New Application
@@ -193,7 +196,9 @@ First, configure the Elastic Beanstalk Twoge environment by running the `eb init
 5. Platform Branch: Docker running on 64bit Amazon Linux 2
 6. CodeCommit? N
 7. SSH? N
+
 Once complete, the configuration file will be compiled in `./.elasticbeanstalk/config.yml.
+
 Comment out or delete elasticbeanstalk hidden files found within the .gitignore document found within the main project directory
 
 <img width="578" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/eb045002-edb7-4b6d-8bbc-327a3f783341">
@@ -217,6 +222,9 @@ Once the EB environment is finished building, set the environment variable using
 eb setenv SQLALCHEMY_DATABASE_URI=postgresql://admin:password@twoge-database-1.ctfbo8wbotzl.ca-central-1.rds.amazonaws.com:5432/mytwoge_db
 ```
 Once the EB environment has finished updating, update the inbound rule on the instances associated security group to allow incoming TCP traffic on port 5000.
+
+<img width="830" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/66e4d4d1-6b5d-4dec-bc5d-5c771ec155e3">
+
 Navigate to the domain associated with the Elastic Beanstalk's environment and post your first blog!
 
 <img width="953" alt="image" src="https://github.com/perryb3693/twoge/assets/129805541/6ac90f63-e648-4da0-90af-b5b8661e929b">
