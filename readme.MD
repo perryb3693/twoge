@@ -128,21 +128,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2		#checks-out repository under $GITHUB_WORKSPACE so that it can be accessed by the workflow
         with:
           ref: master
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1	#create and boot an image builder
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v1		#login to DockerHub using env variables
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2	#build and push Docker image
         with:
           context: .
           push: true
@@ -159,13 +159,13 @@ jobs:
           ref: master
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2		#install python
         with:
           python-version: 3.x
 
       - name: Install EB CLI
         run: |
-          pip install awsebcli --upgrade
+          pip install awsebcli --upgrade	
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
