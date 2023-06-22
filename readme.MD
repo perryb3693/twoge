@@ -78,7 +78,7 @@ services:
 
   web:
     build: .                                    				#build image using workdir Dockerfile
-    restart: always								#restarts container
+    restart: always								#restarts container if the container fails
     container_name: twoge_app
     ports:
       - 5000:5000                               				#map port 5000 on the container to port 5000 on local machine 
